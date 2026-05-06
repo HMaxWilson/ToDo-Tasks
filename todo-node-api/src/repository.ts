@@ -32,12 +32,12 @@ async function writeStore(store: Store): Promise<void> {
   await fs.writeFile(FILE_PATH, JSON.stringify(store, null, 2), 'utf-8');
 }
 
-// Serialize all mutating operations to avoid concurrent write races.
-let writeQueue: Promise<unknown> = Promise.resolve();
+// Serializes all mutating operations to avoid concurrent write races.
+let writeTail: Promise<unknown> = Promise.resolve();
 
 function enqueue<T>(fn: () => Promise<T>): Promise<T> {
-  const next = writeQueue.then(fn);
-  writeQueue = next.catch(() => undefined);
+  const next = writeTail.then(fn);
+  writeTail = next.catch(() => undefined);
   return next;
 }
 
