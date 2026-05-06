@@ -1,70 +1,94 @@
-import fs from 'fs';
+import fs from 'fs/promises';
+import { existsSync, mkdirSync } from 'fs';
 import path from 'path';
 import { TodoItem } from './types';
 
 const DATA_DIR = path.join(__dirname, '..', 'data');
 const FILE_PATH = path.join(DATA_DIR, 'todos.json');
 
-function ensureFile(): void {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
+interface Store {
+  nextId: number;
+  items: TodoItem[];
+}
+
+function ensureDir(): void {
+  if (!existsSync(DATA_DIR)) {
+    mkdirSync(DATA_DIR, { recursive: true });
   }
-  if (!fs.existsSync(FILE_PATH)) {
-    fs.writeFileSync(FILE_PATH, JSON.stringify([], null, 2), 'utf-8');
+}
+
+async function readStore(): Promise<Store> {
+  ensureDir();
+  try {
+    const raw = await fs.readFile(FILE_PATH, 'utf-8');
+    return JSON.parse(raw) as Store;
+  } catch {
+    return { nextId: 1, items: [] };
   }
 }
 
-function readAll(): TodoItem[] {
-  ensureFile();
-  const raw = fs.readFileSync(FILE_PATH, 'utf-8');
-  return JSON.parse(raw) as TodoItem[];
+async function writeStore(store: Store): Promise<void> {
+  ensureDir();
+  await fs.writeFile(FILE_PATH, JSON.stringify(store, null, 2), 'utf-8');
 }
 
-function writeAll(items: TodoItem[]): void {
-  ensureFile();
-  fs.writeFileSync(FILE_PATH, JSON.stringify(items, null, 2), 'utf-8');
+// Serialize all mutating operations to avoid concurrent write races.
+let writeQueue: Promise<unknown> = Promise.resolve();
+
+function enqueue<T>(fn: () => Promise<T>): Promise<T> {
+  const next = writeQueue.then(fn);
+  writeQueue = next.catch(() => undefined);
+  return next;
 }
 
-export function getAll(): TodoItem[] {
-  return readAll();
+export async function getAll(): Promise<TodoItem[]> {
+  const store = await readStore();
+  return store.items;
 }
 
-export function getById(id: number): TodoItem | undefined {
-  return readAll().find((t) => t.id === id);
+export async function getById(id: number): Promise<TodoItem | undefined> {
+  const store = await readStore();
+  return store.items.find((t) => t.id === id);
 }
 
-export function add(item: Partial<TodoItem>): TodoItem {
-  const items = readAll();
-  const newId = items.length > 0 ? Math.max(...items.map((t) => t.id)) + 1 : 1;
-  const newItem: TodoItem = {
-    id: newId,
-    title: item.title ?? '',
-    isComplete: item.isComplete ?? false,
-    createdAt: new Date().toISOString(),
-  };
-  items.push(newItem);
-  writeAll(items);
-  return newItem;
+export function add(item: Partial<TodoItem>): Promise<TodoItem> {
+  return enqueue(async () => {
+    const store = await readStore();
+    const newItem: TodoItem = {
+      id: store.nextId,
+      title: item.title ?? '',
+      isComplete: item.isComplete ?? false,
+      createdAt: new Date().toISOString(),
+    };
+    store.nextId += 1;
+    store.items.push(newItem);
+    await writeStore(store);
+    return newItem;
+  });
 }
 
-export function update(id: number, patch: Partial<TodoItem>): TodoItem | undefined {
-  const items = readAll();
-  const existing = items.find((t) => t.id === id);
-  if (!existing) return undefined;
+export function update(id: number, patch: Partial<TodoItem>): Promise<TodoItem | undefined> {
+  return enqueue(async () => {
+    const store = await readStore();
+    const existing = store.items.find((t) => t.id === id);
+    if (!existing) return undefined;
 
-  if (patch.title !== undefined) existing.title = patch.title;
-  if (patch.isComplete !== undefined) existing.isComplete = patch.isComplete;
+    if (patch.title !== undefined) existing.title = patch.title;
+    if (patch.isComplete !== undefined) existing.isComplete = patch.isComplete;
 
-  writeAll(items);
-  return existing;
+    await writeStore(store);
+    return existing;
+  });
 }
 
-export function remove(id: number): boolean {
-  const items = readAll();
-  const index = items.findIndex((t) => t.id === id);
-  if (index === -1) return false;
+export function remove(id: number): Promise<boolean> {
+  return enqueue(async () => {
+    const store = await readStore();
+    const index = store.items.findIndex((t) => t.id === id);
+    if (index === -1) return false;
 
-  items.splice(index, 1);
-  writeAll(items);
-  return true;
+    store.items.splice(index, 1);
+    await writeStore(store);
+    return true;
+  });
 }
