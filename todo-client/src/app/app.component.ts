@@ -34,6 +34,12 @@ export class AppComponent implements OnInit, OnDestroy {
     /** Current OData $orderby expression. */
     sortBy = DEFAULT_TODO_SORT;
 
+    /**
+     * True when a local change may have invalidated the order the API returned.
+     * See onToggleComplete for why we surface this rather than silently re-sort.
+     */
+    sortStale = false;
+
     private destroy$ = new Subject<void>();
 
     constructor(private todoService: TodoService) {}
@@ -59,6 +65,11 @@ export class AppComponent implements OnInit, OnDestroy {
         this.errorMessage = null;
     }
 
+    /** Re-fetch in the current order, clearing the stale-order hint. */
+    resort(): void {
+        this.loadTodos();
+    }
+
     onSortChange(value: string): void {
         if (value === this.sortBy) return;
         this.sortBy = value;
@@ -81,6 +92,7 @@ export class AppComponent implements OnInit, OnDestroy {
             .subscribe({
                 next: (todos) => {
                     this.todos = todos;
+                    this.sortStale = false;
                 },
                 error: () => {
                     this.errorMessage =
@@ -103,8 +115,12 @@ export class AppComponent implements OnInit, OnDestroy {
                 finalize(() => (this.isAdding = false)),
             )
             .subscribe({
-                next: (newItem) => {
-                    this.todos = [...this.todos, newItem];
+                next: () => {
+                    // Where a new item belongs depends on the active sort,
+                    // which only the API knows how to apply. Appending locally
+                    // would always put it last, which is wrong under every
+                    // ordering except "oldest first". Reload instead.
+                    this.loadTodos();
                 },
                 error: () => {
                     this.errorMessage = 'Failed to add todo.';
@@ -128,6 +144,15 @@ export class AppComponent implements OnInit, OnDestroy {
                     this.todos = this.todos.map((t) =>
                         t.id === updated.id ? updated : t,
                     );
+
+                    // Deliberately NOT reloading. Re-ordering here would make
+                    // the row leap away from under the user's cursor the moment
+                    // they tick it. Instead, if the active sort depends on
+                    // completion state, flag that the order is now stale and
+                    // let the user re-sort when they choose to.
+                    if (this.sortBy.includes('isComplete')) {
+                        this.sortStale = true;
+                    }
                 },
                 error: () => {
                     this.errorMessage = `Failed to update "${item.title}".`;
