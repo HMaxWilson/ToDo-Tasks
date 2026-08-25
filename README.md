@@ -30,6 +30,25 @@ Both services start with hot reload enabled:
 | API      | http://localhost:5080   |
 | Frontend | http://localhost:4200   |
 
+That runs in the foreground and streams the logs from both containers, which is
+what you want while developing — compile errors appear as they happen. It holds
+the terminal until you stop it, and `Ctrl+C` **stops the containers** rather than
+just detaching from them.
+
+To run it in the background instead:
+
+```bash
+docker compose up -d --build
+```
+
+Then:
+
+```bash
+docker compose logs -f        # follow both services
+docker compose logs -f api    # follow one service
+docker compose ps             # what is running
+```
+
 Source directories are bind-mounted, so edits on the host rebuild inside the
 containers. Todo data is written to the `todo-data` named volume via the
 `DataDirectory` setting, so it survives rebuilds.
