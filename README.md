@@ -107,6 +107,39 @@ The value appears in four places and they must agree:
 
 ---
 
+## Troubleshooting
+
+**Added an npm dependency and the container cannot find it**
+
+`/app/node_modules` is a named volume, so it shadows whatever the image built —
+rebuilding alone does not update it. The client runs `npm install` on every start
+to reconcile this, so `docker compose up` is normally enough.
+
+If a package is still missing, remove the volume and rebuild:
+
+```bash
+docker compose down
+docker volume rm full-stack-todo_client-modules
+docker compose up --build
+```
+
+`docker compose down -v` also works, but it deletes the todo data volume too.
+
+**`bind: address already in use` on startup**
+
+Something already holds the port. On macOS, check whether it is AirPlay Receiver:
+
+```bash
+sudo lsof -nP -iTCP:5080 -sTCP:LISTEN
+```
+
+**Edits not picked up**
+
+File watching across bind mounts is polling-based, so there is a short delay.
+If nothing happens at all, `docker compose restart` the affected service.
+
+---
+
 ## Project structure
 
 ```
