@@ -29,7 +29,7 @@ cd TodoApi
 dotnet run
 ```
 
-The API will listen on **http://localhost:5000**.
+The API will listen on **http://localhost:5080**.
 
 #### OData endpoints
 
@@ -46,7 +46,7 @@ OData query options (`$filter`, `$orderby`, `$select`, `$top`, `$skip`, `$count`
 
 Example:
 ```
-GET http://localhost:5000/odata/TodoItems?$filter=isComplete eq false&$orderby=createdAt desc
+GET http://localhost:5080/odata/TodoItems?$filter=isComplete eq false&$orderby=createdAt desc
 ```
 
 ---
