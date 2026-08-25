@@ -4,6 +4,7 @@ import { finalize, takeUntil } from 'rxjs/operators';
 import { TodoItem } from './models/todo-item.model';
 import {
     DEFAULT_TODO_SORT,
+    MANUAL_SORT,
     TODO_SORT_OPTIONS,
 } from './models/todo-sort.model';
 import { TodoService } from './services/todo.service';
@@ -40,6 +41,15 @@ export class AppComponent implements OnInit, OnDestroy {
      */
     sortStale = false;
 
+    /**
+     * Dragging only makes sense while the manual ordering is on screen.
+     * Under any other sort the position a user drops an item into would be
+     * overwritten by the next load, so it is disabled rather than misleading.
+     */
+    get canReorder(): boolean {
+        return this.sortBy === MANUAL_SORT;
+    }
+
     private destroy$ = new Subject<void>();
 
     constructor(private todoService: TodoService) {}
@@ -63,6 +73,34 @@ export class AppComponent implements OnInit, OnDestroy {
 
     dismissError(): void {
         this.errorMessage = null;
+    }
+
+    /**
+     * Applies a drag result.
+     *
+     * The move is made locally first: snapping the row back to its old
+     * position while a request completes would feel broken. If the write
+     * fails we reload, which restores whatever the server actually has.
+     */
+    onReorder(move: { previousIndex: number; currentIndex: number }): void {
+        if (!this.canReorder) return;
+        if (move.previousIndex === move.currentIndex) return;
+
+        const reordered = [...this.todos];
+        const [moved] = reordered.splice(move.previousIndex, 1);
+        reordered.splice(move.currentIndex, 0, moved);
+        this.todos = reordered;
+
+        this.todoService
+            .reorder(reordered.map((t) => t.id))
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                error: () => {
+                    this.errorMessage =
+                        'Failed to save the new order. Reloading.';
+                    this.loadTodos();
+                },
+            });
     }
 
     /** Re-fetch in the current order, clearing the stale-order hint. */

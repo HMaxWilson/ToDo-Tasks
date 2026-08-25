@@ -1,3 +1,4 @@
+import { DragDropModule } from '@angular/cdk/drag-drop';
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -15,7 +16,7 @@ import { TodoListComponent } from './components/todo-list/todo-list.component';
         TodoItemComponent,
         AddTodoComponent,
     ],
-    imports: [BrowserModule, FormsModule, HttpClientModule],
+    imports: [BrowserModule, FormsModule, HttpClientModule, DragDropModule],
     providers: [],
     bootstrap: [AppComponent],
 })

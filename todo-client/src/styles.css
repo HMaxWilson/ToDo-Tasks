@@ -12,3 +12,50 @@ body {
     color: #333;
     min-height: 100vh;
 }
+
+/* ---------------------------------------------------------------------------
+   Drag and drop (Angular CDK)
+
+   These live in the global stylesheet rather than a component one on purpose:
+   during a drag the CDK moves the preview element to <body>, outside the
+   component's view encapsulation, so scoped rules never reach it.
+   --------------------------------------------------------------------------- */
+
+/* The element that follows the cursor. */
+.cdk-drag-preview {
+    box-sizing: border-box;
+    border-radius: 8px;
+    opacity: 0.95;
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.18),
+        0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.cdk-drag-preview .todo-item {
+    background: #fff;
+    border-color: #d2e3fc;
+}
+
+/* The gap left behind, showing where the row will land. */
+.cdk-drag-placeholder .todo-item {
+    background: #f1f3f4;
+    border: 1px dashed #bdc1c6;
+    opacity: 0.5;
+}
+
+/* Rows sliding out of the way live, while the drag is still in progress.
+   This is what makes the reorder readable before the user lets go. */
+.cdk-drop-list-dragging .cdk-drag:not(.cdk-drag-placeholder) {
+    transition: transform 220ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+/* The dropped row settling into place. */
+.cdk-drag-animating {
+    transition: transform 260ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+/* Suppress the row hover tint mid-drag - it fires on whatever is under the
+   cursor and reads as flicker. */
+.cdk-drop-list-dragging .todo-item:hover {
+    background: #fafafa;
+}

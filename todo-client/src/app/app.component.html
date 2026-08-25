@@ -53,6 +53,8 @@
             [class.refreshing]="isLoading"
             [todos]="todos"
             [pendingIds]="pendingIds"
+            [canReorder]="canReorder"
+            (reorder)="onReorder($event)"
             (toggleComplete)="onToggleComplete($event)"
             (deleteTodo)="onDeleteTodo($event)"
         >

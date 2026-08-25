@@ -12,6 +12,9 @@ export class TodoItemComponent {
     /** True while this item has a request in flight. */
     @Input() pending = false;
 
+    /** True when the list is in manual-order mode, so the handle is shown. */
+    @Input() draggable = false;
+
     @Output() toggleComplete = new EventEmitter<TodoItem>();
     @Output() deleteTodo = new EventEmitter<number>();
 

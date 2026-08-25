@@ -4,6 +4,15 @@
     [class.pending]="pending"
     [attr.aria-busy]="pending"
 >
+    <span
+        *ngIf="draggable"
+        cdkDragHandle
+        class="drag-handle"
+        aria-hidden="true"
+        title="Drag to reorder"
+        >⠿</span
+    >
+
     <input
         type="checkbox"
         [checked]="todo.isComplete"

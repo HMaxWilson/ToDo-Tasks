@@ -7,12 +7,27 @@
         No todos yet — add one above!
     </p>
 
-    <app-todo-item
-        *ngFor="let todo of todos; trackBy: trackById"
-        [todo]="todo"
-        [pending]="isPending(todo.id)"
-        (toggleComplete)="onToggle($event)"
-        (deleteTodo)="onDelete($event)"
+    <p class="reorder-hint" *ngIf="todos.length > 1 && !canReorder">
+        Switch to the default order to drag items around.
+    </p>
+
+    <div
+        class="todo-drop-list"
+        cdkDropList
+        [cdkDropListDisabled]="!canReorder"
+        (cdkDropListDropped)="onDrop($event)"
     >
-    </app-todo-item>
+        <app-todo-item
+            *ngFor="let todo of todos; trackBy: trackById"
+            cdkDrag
+            cdkDragBoundary=".todo-drop-list"
+            [cdkDragDisabled]="!canReorder || isPending(todo.id)"
+            [todo]="todo"
+            [pending]="isPending(todo.id)"
+            [draggable]="canReorder"
+            (toggleComplete)="onToggle($event)"
+            (deleteTodo)="onDelete($event)"
+        >
+        </app-todo-item>
+    </div>
 </div>
