@@ -8,14 +8,20 @@ import { TodoItem } from '../../models/todo-item.model';
 })
 export class TodoItemComponent {
     @Input() todo!: TodoItem;
+
+    /** True while this item has a request in flight. */
+    @Input() pending = false;
+
     @Output() toggleComplete = new EventEmitter<TodoItem>();
     @Output() deleteTodo = new EventEmitter<number>();
 
     onToggle(): void {
+        if (this.pending) return;
         this.toggleComplete.emit(this.todo);
     }
 
     onDelete(): void {
+        if (this.pending) return;
         this.deleteTodo.emit(this.todo.id);
     }
 }

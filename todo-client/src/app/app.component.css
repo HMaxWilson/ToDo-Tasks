@@ -47,3 +47,12 @@
     color: #888;
     padding: 24px 0;
 }
+
+/* Subsequent loads keep the list visible but make it clear it is stale
+   and not interactive, rather than blanking the screen. */
+app-todo-list.refreshing {
+    display: block;
+    opacity: 0.5;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+}
