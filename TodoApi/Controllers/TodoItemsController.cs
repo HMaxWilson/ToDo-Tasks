@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Deltas;
+using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using TodoApi.Models;
@@ -54,6 +55,37 @@ public class TodoItemsController : ODataController
         delta.Patch(existing);
         _repository.Update(key, existing);
         return Updated(existing);
+    }
+
+    /// <summary>
+    /// POST /odata/TodoItems/Reorder with body { "ids": [3, 1, 2] }.
+    /// Applies a new manual ordering in one write.
+    /// </summary>
+    [HttpPost]
+    public IActionResult Reorder(ODataActionParameters parameters)
+    {
+        if (parameters is null ||
+            !parameters.TryGetValue("ids", out var raw) ||
+            raw is not IEnumerable<int> ids)
+        {
+            return BadRequest("Expected an 'ids' array of todo ids.");
+        }
+
+        var orderedIds = ids.ToList();
+
+        if (orderedIds.Count == 0)
+        {
+            return BadRequest("'ids' must contain at least one id.");
+        }
+
+        if (orderedIds.Distinct().Count() != orderedIds.Count)
+        {
+            return BadRequest("'ids' must not contain duplicates.");
+        }
+
+        return _repository.Reorder(orderedIds)
+            ? NoContent()
+            : NotFound("One or more ids do not exist.");
     }
 
     public IActionResult Delete(int key)

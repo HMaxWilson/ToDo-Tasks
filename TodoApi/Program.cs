@@ -8,7 +8,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Build the OData EDM model with camelCase naming
 var modelBuilder = new ODataConventionModelBuilder();
 modelBuilder.EnableLowerCamelCase();
-modelBuilder.EntitySet<TodoItem>("TodoItems");
+var todoItems = modelBuilder.EntitySet<TodoItem>("TodoItems");
+
+// Collection-bound action: POST /odata/TodoItems/Reorder  { "ids": [3, 1, 2] }
+// Reordering is one user action over many rows, so it is a single call
+// rather than a PATCH per item - which would be N requests racing.
+var reorder = todoItems.EntityType.Collection.Action("Reorder");
+reorder.CollectionParameter<int>("ids");
 var edmModel = modelBuilder.GetEdmModel();
 
 // Add services
