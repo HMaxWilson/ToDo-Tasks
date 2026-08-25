@@ -20,6 +20,22 @@
             </button>
         </div>
 
+        <div class="sort-bar" *ngIf="todos.length > 1">
+            <label class="sort-label" for="sort-select">Sort by</label>
+            <select
+                id="sort-select"
+                name="sort"
+                class="sort-select"
+                [ngModel]="sortBy"
+                (ngModelChange)="onSortChange($event)"
+                [disabled]="isLoading"
+            >
+                <option *ngFor="let option of sortOptions" [value]="option.value">
+                    {{ option.label }}
+                </option>
+            </select>
+        </div>
+
         <div *ngIf="isFirstLoad" class="loading" role="status">Loading…</div>
 
         <app-todo-list

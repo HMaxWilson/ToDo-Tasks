@@ -2,6 +2,10 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
 import { finalize, takeUntil } from 'rxjs/operators';
 import { TodoItem } from './models/todo-item.model';
+import {
+    DEFAULT_TODO_SORT,
+    TODO_SORT_OPTIONS,
+} from './models/todo-sort.model';
 import { TodoService } from './services/todo.service';
 
 @Component({
@@ -24,6 +28,11 @@ export class AppComponent implements OnInit, OnDestroy {
 
     /** Ids of items with an in-flight update or delete. */
     pendingIds = new Set<number>();
+
+    readonly sortOptions = TODO_SORT_OPTIONS;
+
+    /** Current OData $orderby expression. */
+    sortBy = DEFAULT_TODO_SORT;
 
     private destroy$ = new Subject<void>();
 
@@ -50,12 +59,18 @@ export class AppComponent implements OnInit, OnDestroy {
         this.errorMessage = null;
     }
 
+    onSortChange(value: string): void {
+        if (value === this.sortBy) return;
+        this.sortBy = value;
+        this.loadTodos();
+    }
+
     loadTodos(): void {
         this.isLoading = true;
         this.errorMessage = null;
 
         this.todoService
-            .getAll()
+            .getAll(this.sortBy)
             .pipe(
                 takeUntil(this.destroy$),
                 finalize(() => {
