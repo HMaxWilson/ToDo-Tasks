@@ -16,3 +16,18 @@
     padding: 24px 0;
     font-size: 0.95rem;
 }
+
+.reorder-hint {
+    font-size: 0.8rem;
+    color: #9aa0a6;
+    margin: 0 0 8px;
+    text-align: right;
+}
+
+/* The drag container is a flex child of .todo-list, so it needs its own
+   column layout - otherwise the rows inside it lose the 8px gap. */
+.todo-drop-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}

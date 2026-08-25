@@ -56,3 +56,22 @@
 .todo-item.pending .btn-delete {
     cursor: progress;
 }
+
+/* Grip shown only while the manual ordering is active. */
+.drag-handle {
+    cursor: grab;
+    color: #9aa0a6;
+    font-size: 1rem;
+    line-height: 1;
+    padding: 0 6px 0 0;
+    user-select: none;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.todo-item.pending .drag-handle {
+    cursor: progress;
+    opacity: 0.5;
+}
