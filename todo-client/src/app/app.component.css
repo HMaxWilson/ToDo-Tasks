@@ -56,3 +56,38 @@ app-todo-list.refreshing {
     pointer-events: none;
     transition: opacity 0.15s ease;
 }
+
+/* Sort control. Only rendered when there is more than one item to order. */
+.sort-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin: 16px 0 4px;
+}
+
+.sort-label {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.sort-select {
+    font: inherit;
+    font-size: 0.85rem;
+    padding: 6px 10px;
+    border: 1px solid #dadce0;
+    border-radius: 8px;
+    background: #fff;
+    color: #202124;
+    cursor: pointer;
+}
+
+.sort-select:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.sort-select:focus-visible {
+    outline: 2px solid #1a73e8;
+    outline-offset: 1px;
+}

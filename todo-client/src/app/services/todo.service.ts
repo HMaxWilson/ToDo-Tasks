@@ -16,9 +16,20 @@ export class TodoService {
 
     constructor(private http: HttpClient) {}
 
-    getAll(): Observable<TodoItem[]> {
+    /**
+     * @param orderBy Optional OData $orderby expression, e.g. "createdAt desc".
+     *                Omitted, the API returns its natural order.
+     */
+    getAll(orderBy?: string): Observable<TodoItem[]> {
+        // $orderby is written literally rather than built with HttpParams:
+        // that would percent-encode the leading $, which not every OData
+        // stack handles. Only the expression itself needs encoding.
+        const url = orderBy
+            ? `${this.apiUrl}?$orderby=${encodeURIComponent(orderBy)}`
+            : this.apiUrl;
+
         return this.http
-            .get<ODataResponse<TodoItem>>(this.apiUrl)
+            .get<ODataResponse<TodoItem>>(url)
             .pipe(map((response) => response.value));
     }
 
