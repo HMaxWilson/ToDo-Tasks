@@ -56,6 +56,17 @@ export class TodoService {
             .pipe(map(() => toggled));
     }
 
+    /**
+     * Applies a new manual ordering in a single call.
+     *
+     * Collection-bound OData action rather than a PATCH per item: reordering
+     * is one user action over many rows, and N racing requests would be both
+     * slower and harder to reason about.
+     */
+    reorder(ids: number[]): Observable<void> {
+        return this.http.post<void>(`${this.apiUrl}/Reorder`, { ids });
+    }
+
     delete(id: number): Observable<void> {
         return this.http.delete<void>(`${this.apiUrl}(${id})`);
     }
