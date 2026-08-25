@@ -21,6 +21,16 @@
         </div>
 
         <div class="sort-bar" *ngIf="todos.length > 1">
+            <button
+                *ngIf="sortStale"
+                type="button"
+                class="btn-resort"
+                (click)="resort()"
+                [disabled]="isLoading"
+            >
+                Order is out of date — re-sort
+            </button>
+
             <label class="sort-label" for="sort-select">Sort by</label>
             <select
                 id="sort-select"

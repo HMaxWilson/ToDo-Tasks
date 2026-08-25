@@ -91,3 +91,32 @@ app-todo-list.refreshing {
     outline: 2px solid #1a73e8;
     outline-offset: 1px;
 }
+
+/* Shown when a local change has invalidated the order the API returned.
+   Completing an item is deliberately not re-sorted on the spot - the row
+   would jump away mid-click - so the staleness is surfaced instead. */
+.btn-resort {
+    font: inherit;
+    font-size: 0.8rem;
+    padding: 5px 10px;
+    margin-right: auto;
+    border: 1px solid #f0c36d;
+    border-radius: 8px;
+    background: #fef7e0;
+    color: #8a6116;
+    cursor: pointer;
+}
+
+.btn-resort:hover:not(:disabled) {
+    background: #fdf0cc;
+}
+
+.btn-resort:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.btn-resort:focus-visible {
+    outline: 2px solid #1a73e8;
+    outline-offset: 1px;
+}
