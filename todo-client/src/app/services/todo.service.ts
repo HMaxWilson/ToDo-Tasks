@@ -12,7 +12,7 @@ interface ODataResponse<T> {
     providedIn: 'root',
 })
 export class TodoService {
-    private readonly apiUrl = 'http://localhost:7234/odata/TodoItems';
+    private readonly apiUrl = 'http://localhost:5080/odata/TodoItems';
 
     constructor(private http: HttpClient) {}
 

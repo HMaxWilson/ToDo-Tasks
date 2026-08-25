@@ -1,0 +1,46 @@
+name: full-stack-todo
+
+# Dev-mode compose: one command to start the whole solution with hot reload.
+# Nothing here is intended for production - see README for what a prod build
+# would look like and why it is deliberately out of scope.
+
+services:
+  api:
+    build: ./TodoApi
+    environment:
+      # Explicit rather than inherited, so the port is not a mystery.
+      - ASPNETCORE_URLS=http://+:8080
+      - ASPNETCORE_ENVIRONMENT=Development
+      # Absolute path. appsettings.json uses a relative "data" which resolves
+      # against the working directory, so it moves depending on how you start.
+      - DataDirectory=/data
+      # dotnet watch uses inotify, which does not fire across macOS bind mounts.
+      - DOTNET_USE_POLLING_FILE_WATCHER=1
+    ports:
+      # 5080, not 5000: macOS binds 5000 to AirPlay Receiver, so the
+      # conventional ASP.NET dev port is unusable on any Mac by default.
+      - "5080:8080"
+    volumes:
+      - ./TodoApi:/src
+      # Keep the host's bin/obj (built by a local SDK) out of the container's.
+      - api-bin:/src/bin
+      - api-obj:/src/obj
+      - todo-data:/data
+
+  client:
+    build: ./todo-client
+    ports:
+      # 4200 matches the CORS policy already configured in Program.cs.
+      - "4200:4200"
+    volumes:
+      - ./todo-client:/app
+      # Stop the source bind mount shadowing installed packages.
+      - client-modules:/app/node_modules
+    depends_on:
+      - api
+
+volumes:
+  todo-data:
+  api-bin:
+  api-obj:
+  client-modules:
