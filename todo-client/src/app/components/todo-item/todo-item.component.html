@@ -1,13 +1,24 @@
-<div class="todo-item" [class.completed]="todo.isComplete">
+<div
+    class="todo-item"
+    [class.completed]="todo.isComplete"
+    [class.pending]="pending"
+    [attr.aria-busy]="pending"
+>
     <input
         type="checkbox"
         [checked]="todo.isComplete"
+        [disabled]="pending"
         (change)="onToggle()"
         class="todo-checkbox"
         [attr.aria-label]="'Mark ' + todo.title + ' as complete'"
     />
     <span class="todo-title">{{ todo.title }}</span>
-    <button class="btn-delete" (click)="onDelete()" aria-label="Delete todo">
+    <button
+        class="btn-delete"
+        [disabled]="pending"
+        (click)="onDelete()"
+        aria-label="Delete todo"
+    >
         ✕
     </button>
 </div>

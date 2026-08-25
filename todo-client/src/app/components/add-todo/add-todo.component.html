@@ -3,11 +3,16 @@
         type="text"
         class="add-todo-input"
         [(ngModel)]="newTitle"
+        [disabled]="submitting"
         name="newTitle"
         placeholder="What needs to be done?"
         autocomplete="off"
     />
-    <button type="submit" class="btn-add" [disabled]="!newTitle.trim()">
-        Add
+    <button
+        type="submit"
+        class="btn-add"
+        [disabled]="submitting || !newTitle.trim()"
+    >
+        {{ submitting ? 'Adding…' : 'Add' }}
     </button>
 </form>

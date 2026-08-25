@@ -45,3 +45,14 @@
 .btn-delete:hover {
     color: #c5221f;
 }
+
+/* An item with a request in flight: visibly inert, controls disabled. */
+.todo-item.pending {
+    opacity: 0.55;
+    cursor: progress;
+}
+
+.todo-item.pending .todo-checkbox,
+.todo-item.pending .btn-delete {
+    cursor: progress;
+}

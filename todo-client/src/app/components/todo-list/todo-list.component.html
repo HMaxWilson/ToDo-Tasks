@@ -8,8 +8,9 @@
     </p>
 
     <app-todo-item
-        *ngFor="let todo of todos"
+        *ngFor="let todo of todos; trackBy: trackById"
         [todo]="todo"
+        [pending]="isPending(todo.id)"
         (toggleComplete)="onToggle($event)"
         (deleteTodo)="onDelete($event)"
     >

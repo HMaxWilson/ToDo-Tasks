@@ -4,18 +4,29 @@
     </header>
 
     <main class="app-main">
-        <app-add-todo (addTodo)="onAddTodo($event)"></app-add-todo>
+        <app-add-todo
+            [submitting]="isAdding"
+            (addTodo)="onAddTodo($event)"
+        ></app-add-todo>
 
-        <div *ngIf="errorMessage" class="error-banner">
+        <div *ngIf="errorMessage" class="error-banner" role="alert">
             {{ errorMessage }}
-            <button class="btn-dismiss" (click)="errorMessage = null">✕</button>
+            <button
+                class="btn-dismiss"
+                (click)="dismissError()"
+                aria-label="Dismiss error"
+            >
+                ✕
+            </button>
         </div>
 
-        <div *ngIf="isLoading" class="loading">Loading…</div>
+        <div *ngIf="isFirstLoad" class="loading" role="status">Loading…</div>
 
         <app-todo-list
-            *ngIf="!isLoading"
+            *ngIf="!isFirstLoad"
+            [class.refreshing]="isLoading"
             [todos]="todos"
+            [pendingIds]="pendingIds"
             (toggleComplete)="onToggleComplete($event)"
             (deleteTodo)="onDeleteTodo($event)"
         >
